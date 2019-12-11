@@ -8,16 +8,10 @@ pipe2 = "L1006,D998,R94,D841,R911,D381,R532,U836,L299,U237,R781,D597,L399,D800,L
 moves1 = pipe1.split(",")
 moves2 = pipe2.split(",")
 shortestdist = 9999999
-field = np.zeros((40000, 40000))
+field = np.zeros((20000, 20000))
 startx = 10000
 starty = 10000
 field[startx][starty] = 2
-
-#return distance from center
-def dist(x, y):
-  global starty
-  global startx
-  return abs(x - startx) + abs(y - starty)
 
 #parse code to direction and distance
 def parse(code):
@@ -38,40 +32,44 @@ def getcoord(x, y, d):
   return x,y
 
 # lay pipe in new coord
-def lay(x, y, d):
+def lay(x, y, d, steps):
   global field
   nx,ny = getcoord(x, y, d)
-  field[nx][ny] = 1
+  if field[nx][ny] == 0.0:
+    field[nx][ny] = steps
   return nx, ny
 
 # check for interseption in new coord
-def checkForIntersection(x, y, d):
+def checkForIntersection(x, y, d, steps):
   global field
   global shortestdist
   nx, ny = getcoord(x,y,d)
-  if field[nx][ny] == 1:
-    if dist(nx, ny) < shortestdist:
-      shortestdist = dist(nx, ny)
+  if field[nx][ny] != 0.0:
+    if field[nx][ny] + steps < shortestdist:
+      shortestdist = field[nx][ny] + steps
   return nx, ny
 
 # lay pipes
 curx = startx
 cury = starty
+steps = 1
 for code in moves1:
   direc, dista = parse(code)
   while dista > 0:
-    curx, cury = lay(curx, cury, direc)
+    curx, cury = lay(curx, cury, direc, steps)
     dista -= 1
+    steps += 1
 
 # check for interseptions
 curx = startx
 cury = starty
+steps = 1
 for code in moves2:
+  
   direc, dista = parse(code)
   while dista > 0:
-    curx, cury = checkForIntersection(curx, cury, direc)
+    curx, cury = checkForIntersection(curx, cury, direc, steps)
     dista -= 1
-
-
+    steps += 1
 
 print(shortestdist)
